@@ -18,6 +18,7 @@ import "./Layout.css"
 import { STORE_TYPES } from "../types"
 import { camelToSentence } from "../utils"
 import { RuleBasedFilters } from "./RuleBasedFilters"
+import { Notifications } from "./Notifications"
 import { useLocalStorage } from "../hooks/useLocalStorage"
 
 export function Layout() {
@@ -41,6 +42,10 @@ export function Layout() {
   )
   let [enableRuleBasedFiltering, setEnableRuleBasedFiltering] = useLocalStorage(
     "enable-rule-based-filter",
+    false
+  )
+  let [enableNotifications, setEnableNotifications] = useLocalStorage(
+    "enable-notifications",
     false
   )
   let [deemphasizeOption, setDeemphasizeOption] =
@@ -147,6 +152,20 @@ export function Layout() {
       </div>
 
       <div className="sort-row">
+        <label htmlFor="enable-notifications">
+          <Text>Enable Notifications: </Text>
+        </label>
+        <input
+          type="checkbox"
+          id="enable-notifications"
+          checked={enableNotifications}
+          onChange={(event) => {
+            setEnableNotifications(event.target.checked)
+          }}
+        />
+      </div>
+
+      <div className="sort-row">
         <label htmlFor="enable-rule-based-filter">
           <Text>Enable rule based filtering: </Text>
         </label>
@@ -159,6 +178,12 @@ export function Layout() {
           }}
         />
       </div>
+
+      {enableNotifications ? (
+        <div className="rbf-row">
+          <Notifications />
+        </div>
+      ) : null}
 
       {enableRuleBasedFiltering ? (
         <div className="rbf-row">
@@ -177,6 +202,7 @@ export function Layout() {
         sortOption={sortOption}
         filterOption={filterOption}
         enableRuleBasedFilterOption={enableRuleBasedFiltering}
+        enableNotifications={enableNotifications}
         filterRules={rbfOption}
         deemphasizeOption={deemphasizeOption}
       />

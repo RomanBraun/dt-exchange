@@ -173,7 +173,7 @@ function filterFunc(
   storeType: StoreType,
   offer: Personal,
   targets: FilterRule[],
-  items: Items
+  items: Items | undefined
 ) {
   if (!char) {
     return
@@ -305,12 +305,50 @@ function filterFunc(
   offer.description.overrides.filter_match = found
 }
 
+const NOTIFICATION_STORAGE_KEY = "offer_notifications";
+
+function createNotificationAndSave(offer: Personal, storage: Map<string, number>) {
+
+  let expiryDate = new Date();
+  expiryDate.setHours(expiryDate.getHours() + 1, 0, 0, 0)
+  storage.set(offer.offerId, expiryDate.getTime())
+
+  const rarity = `content/rarity/${offer.description.overrides.rarity}`
+  const notificationBody = `${localisation[rarity].display_name} - Rating: ${offer.description.overrides.itemLevel} (${offer.description.overrides.baseItemLevel})\nExpires: ${expiryDate.toLocaleString()}`
+  const notificationTitle = `${localisation[offer.description.id].display_name}`
+
+  new Notification(notificationTitle, {
+    body: notificationBody,
+    // icon: img
+  });
+
+  sessionStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(Object.fromEntries(new Map(
+    // remove expired offers
+    Array.from(storage.entries()).filter(([, expiryDate]) => {
+      const currentTime = new Date().getTime()
+      return currentTime < expiryDate
+    })
+  ))))
+}
+
+function notify(offer: Personal) {
+  if (sessionStorage.getItem(NOTIFICATION_STORAGE_KEY)) {
+    let storage = new Map<string, number>(Object.entries<number>(JSON.parse(sessionStorage.getItem(NOTIFICATION_STORAGE_KEY))))
+    if (!storage.has(offer.offerId)) {
+      createNotificationAndSave(offer, storage)
+    }
+  } else {
+    createNotificationAndSave(offer, new Map<string, number>())
+  }
+}
+
 export function Store({
   character,
   storeType,
   sortOption,
   filterOption,
   enableRuleBasedFilterOption,
+  enableNotifications,
   filterRules,
   deemphasizeOption,
 }: {
@@ -319,6 +357,7 @@ export function Store({
   sortOption: SortOption
   filterOption: FilterOption
   enableRuleBasedFilterOption: boolean
+  enableNotifications: boolean
   filterRules: FilterRule[]
   deemphasizeOption: DeemphasizeOption
 }) {
@@ -336,6 +375,9 @@ export function Store({
       if (targets.length > 0) {
         store.personal.map(function (offer) {
           filterFunc(character, storeType, offer, targets, items)
+          if (enableNotifications && offer.description.overrides.filter_match >= 0) {
+            notify(offer)
+          }
         })
       }
     } catch (e) {

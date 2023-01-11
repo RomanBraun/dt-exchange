@@ -2789,5 +2789,20 @@
   "content/items/traits/bespoke_powersword_p1/infinite_armor_cleave_on_activated_attacks": {
     "display_name": "Sunder",
     "description": "Your Energised Attacks have increased Cleave"
+  },
+  "content/rarity/1": {
+    "display_name": "Profane"
+  },
+  "content/rarity/2": {
+    "display_name": "Redeemed"
+  },
+  "content/rarity/3": {
+    "display_name": "Anointed"
+  },
+  "content/rarity/4": {
+    "display_name": "Exalted"
+  },
+  "content/rarity/5": {
+    "display_name": "Transcendent"
   }
 }
